@@ -1,0 +1,218 @@
+clear
+clc
+
+% Adiciona a pasta com as funções do protocolo
+addpath('protocolo')
+
+% Cria o servidor TCP na porta 5000
+server = tcpserver("0.0.0.0",5000);
+
+disp("Servidor iniciado...")
+
+% Armazena o último número de sequência de cada sessão
+sequencias = containers.Map('KeyType','char','ValueType','double');
+
+% Estatísticas da simulação
+pacotesRecebidos = 0;
+pacotesDescartados = 0;
+
+% Cria pasta de logs caso não exista
+if ~exist('logs','dir')
+    mkdir('logs');
+end
+
+while true
+
+    % Verifica se existem dados disponíveis
+    if server.NumBytesAvailable > 0
+
+        dados = char(readline(server));
+
+        % Handshake inicial
+        if strcmp(dados,"HELLO")
+
+            disp("Handshake realizado")
+
+            writeline(server,"WELCOME");
+
+            continue
+
+        end
+
+        % Encerramento da sessão pelo cliente
+        if strcmp(dados,"BYE")
+            disp("Cliente encerrou sessão")
+            continue
+        end
+
+        % Divide o pacote recebido em campos
+        partes = split(dados,"|");
+
+        % Verifica formato mínimo do pacote
+        if numel(partes) < 7
+
+            writeline(server,"ERRO_FORMATO");
+
+            continue
+
+        end
+
+        % Simulação de perda lógica de mensagens
+        %if rand < 0.10
+
+           % pacotesDescartados = pacotesDescartados + 1;
+
+           % fprintf("Pacote descartado pelo simulador\n");
+
+           % writeline(server,"ERRO_REDE");
+
+           % continue
+
+      %  end
+
+        % Simulação de congestionamento
+        %if rand < 0.20
+
+            %atraso = randi([1 5]);
+
+            %fprintf("Congestionamento simulado: %d s\n",atraso);
+
+           % pause(atraso);
+
+        %end
+
+        % Extração dos campos do protocolo
+        versao = partes{1};
+
+        % Verifica versão suportada
+        if ~strcmp(versao,"1.0")
+            writeline(server,"ERRO_VERSAO");
+            continue
+        end
+
+        tipo = partes{2};
+        sessao = partes{3};
+        seq = str2double(partes{4});
+        timestamp = partes{5};
+        payloadCripto = partes{6};
+        macRecebido = partes{7};
+
+        % Limita tamanho do pacote
+        if strlength(payloadCripto) > 10000
+            writeline(server,"ERRO_TAMANHO");
+            continue
+        end
+
+        % Proteção contra replay attack
+        tempoAtual = posixtime(datetime('now'));
+
+        if abs(tempoAtual - str2double(timestamp)) > 30
+            writeline(server,"ERRO_TIMESTAMP");
+            continue
+        end
+
+        % Reconstrói os dados usados para o HMAC
+        dadosMAC = sprintf('%s|%s|%s|%d|%s|%s',...
+            versao,...
+            tipo,...
+            sessao,...
+            seq,...
+            timestamp,...
+            payloadCripto);
+
+        % Validação de integridade
+        if ~validarMAC(dadosMAC,macRecebido)
+
+            writeline(server,"ERRO_MAC");
+
+            continue
+
+        end
+
+        % Controle de sequência por sessão
+        sessaoKey = char(sessao);
+
+        if ~isKey(sequencias,sessaoKey)
+            sequencias(sessaoKey) = 0;
+        end
+
+        if seq <= sequencias(sessaoKey)
+
+            writeline(server,"ERRO_SEQUENCIA");
+
+            continue
+
+        end
+
+        % Descriptografa a mensagem
+        try
+
+            mensagem = descriptografarMensagem(payloadCripto);
+
+        catch ME
+
+            writeline(server,"ERRO_CRIPTO");
+
+            fprintf("Erro: %s\n",ME.message);
+
+            continue
+
+        end
+
+        % Atualiza número de sequência válido
+        sequencias(sessaoKey) = seq;
+
+        pacotesRecebidos = pacotesRecebidos + 1;
+
+        % Registra atividade no log
+        try
+
+            fid = fopen(fullfile('logs','servidor.log'),'a');
+
+            fprintf(fid,...
+                '[%s] Sessao=%s Seq=%d Tipo=%s\n',...
+                datestr(now,'yyyy-mm-dd HH:MM:SS'),...
+                char(sessao),...
+                seq,...
+                char(tipo));
+
+            fclose(fid);
+
+        catch
+
+        end
+
+        % Exibe informações do pacote recebido
+        fprintf("\n===== PACOTE RECEBIDO =====\n");
+        fprintf("VERSAO: %s\n",versao);
+        fprintf("TIPO: %s\n",tipo);
+        fprintf("SESSAO: %s\n",sessao);
+        fprintf("SEQ: %d\n",seq);
+        fprintf("TIMESTAMP: %s\n",timestamp);
+        fprintf("MSG: %s\n",mensagem);
+        fprintf("===========================\n");
+
+        % Processamento simples da mensagem
+        resposta = upper(mensagem);
+
+        % Envia resposta ao cliente
+        writeline(server,resposta);
+
+        totalPacotes = pacotesRecebidos + pacotesDescartados;
+
+        if totalPacotes > 0
+
+            fprintf("\n===== ESTATISTICAS =====\n");
+            fprintf("Recebidos: %d\n",pacotesRecebidos);
+            fprintf("Descartados: %d\n",pacotesDescartados);
+            fprintf("Taxa de perda: %.2f %%\n",...
+                100*pacotesDescartados/totalPacotes);
+            fprintf("========================\n\n");
+
+        end
+
+    end
+
+    pause(0.01)
+
+end
