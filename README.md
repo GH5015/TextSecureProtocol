@@ -1,23 +1,29 @@
-# TextSecureProtocol (TSP)
+# 🔐 TextSecureProtocol (TSP)
 
-Protocolo de Camada de Aplicação Seguro desenvolvido em MATLAB para a disciplina Rede de Computadores I da Universidade do Estado do Rio de Janeiro (UERJ).
+Protocolo de Camada de Aplicação Seguro desenvolvido em MATLAB para a disciplina **Rede de Computadores I** da **Universidade do Estado do Rio de Janeiro (UERJ)**.
 
-O projeto implementa uma arquitetura cliente-servidor sobre TCP com mecanismos de segurança em nível de aplicação, incluindo criptografia AES-128, autenticação HMAC-SHA256, proteção contra ataques de repetição (Replay Attack), coleta de métricas de desempenho e dashboard gráfico desenvolvido no MATLAB App Designer.
+O projeto implementa uma arquitetura cliente-servidor sobre TCP com mecanismos de segurança em nível de aplicação, incluindo criptografia AES-128, autenticação HMAC-SHA256, proteção contra ataques de repetição (*Replay Attack*), coleta de métricas de desempenho e dashboard gráfico desenvolvido no MATLAB App Designer.
 
-📖 Visão Geral
+---
 
-O TextSecureProtocol (TSP) foi desenvolvido com o objetivo de demonstrar a implementação prática de um protocolo de camada de aplicação capaz de fornecer:
+## 📖 Visão Geral
 
-Confidencialidade dos dados transmitidos;
-Integridade das mensagens;
-Autenticidade dos pacotes;
-Proteção contra Replay Attacks;
-Comunicação confiável utilizando TCP;
-Monitoramento de desempenho em tempo real.
+O **TextSecureProtocol (TSP)** foi desenvolvido com o objetivo de demonstrar a implementação prática de um protocolo de camada de aplicação capaz de fornecer:
+
+- Confidencialidade dos dados transmitidos;
+- Integridade das mensagens;
+- Autenticidade dos pacotes;
+- Proteção contra Replay Attacks;
+- Comunicação confiável utilizando TCP;
+- Monitoramento de desempenho em tempo real.
 
 O protocolo opera sobre uma conexão TCP cliente-servidor, onde o cliente envia mensagens seguras ao servidor, que as processa e retorna uma resposta.
 
-🏗 Arquitetura
+---
+
+## 🏗 Arquitetura
+
+```text
 +-------------+
 |   Cliente   |
 +-------------+
@@ -27,9 +33,11 @@ O protocolo opera sobre uma conexão TCP cliente-servidor, onde o cliente envia 
 +-------------+
 |  Servidor   |
 +-------------+
+```
 
 Fluxo de processamento:
 
+```text
 Mensagem
    ↓
 AES-128
@@ -53,54 +61,85 @@ Descriptografia
 Processamento
    ↓
 Resposta
-🔒 Recursos de Segurança
-Confidencialidade
+```
 
-Criptografia:
+---
 
-AES-128
-Chave compartilhada
-Modo ECB
-Codificação Base64
-Integridade e Autenticidade
-HMAC-SHA256
-Chave secreta compartilhada
-Verificação em todos os pacotes
-Proteção contra Replay Attack
+## 🔒 Recursos de Segurança
 
-Implementada por:
+### Confidencialidade
 
-UUID de sessão
-Número de sequência crescente
-Timestamp Unix
-Janela máxima de 30 segundos
-📦 Estrutura do Pacote TSP
+- Algoritmo AES-128
+- Chave compartilhada de 128 bits
+- Modo ECB
+- Codificação Base64
+
+### Integridade e Autenticidade
+
+- HMAC-SHA256
+- Chave secreta compartilhada
+- Verificação em todos os pacotes
+
+### Proteção contra Replay Attack
+
+Implementada através de:
+
+- UUID de sessão
+- Número de sequência crescente
+- Timestamp Unix
+- Janela de validação de 30 segundos
+
+---
+
+## 📦 Estrutura do Pacote TSP
 
 Cada mensagem segue o formato:
 
+```text
 versao|tipo|sessao|seq|timestamp|payload|mac
+```
 
 Exemplo:
 
-1.0|REQ|36bcec4a-93d0-4ef4-...|1|1748820957|SGVsbG8=|a3f2b1...
-Campos
-Campo	Descrição
-versao	Versão do protocolo
-tipo	Tipo da mensagem
-sessao	UUID da sessão
-seq	Número de sequência
-timestamp	Horário Unix
-payload	Dados criptografados
-mac	HMAC-SHA256
-🤝 Handshake
+```text
+1.0|REQ|36bcec4a-93d0-4ef4-xxxx|1|1748820957|SGVsbG8=|a3f2b1...
+```
+
+### Campos do Pacote
+
+| Campo | Descrição |
+|---------|---------|
+| versao | Versão do protocolo |
+| tipo | Tipo da mensagem |
+| sessao | UUID da sessão |
+| seq | Número de sequência |
+| timestamp | Horário Unix |
+| payload | Dados criptografados |
+| mac | HMAC-SHA256 |
+
+---
+
+## 🤝 Handshake
 
 Antes da comunicação normal:
 
-Cliente
+### Cliente
+
+```text
 HELLO
-Servidor
+```
+
+### Servidor
+
+```text
 WELCOME
-📁 Estrutura do Projeto
+```
+
+---
+
+## 📁 Estrutura do Projeto
+
+```text
 TextSecureProtocol/
 │
 ├── servidor.m
@@ -108,12 +147,12 @@ TextSecureProtocol/
 ├── app1.mlapp
 │
 ├── protocolo/
+│   ├── criarMensagem.m
 │   ├── criptografarMensagem.m
 │   ├── descriptografarMensagem.m
 │   ├── gerarMAC.m
 │   ├── validarMAC.m
-│   ├── validarSequencia.m
-│   └── criarMensagem.m
+│   └── validarSequencia.m
 │
 ├── metricas/
 │   └── medirRTT.m
@@ -121,95 +160,154 @@ TextSecureProtocol/
 ├── logs/
 │   └── servidor.log
 │
-├── resultadoDesempenho.mat
 ├── metricas.mat
+├── resultadoDesempenho.mat
 │
 └── README.md
-⚙️ Requisitos
-Software
-MATLAB R2026a ou superior
-JVM habilitada
-Toolbox Instrument Control
-Sistema Operacional
-Windows 10/11
-Linux
-macOS
-🚀 Execução
-1. Iniciar o Servidor
+```
+
+---
+
+## ⚙️ Requisitos
+
+### Software
+
+- MATLAB R2026a ou superior
+- JVM habilitada
+- Instrument Control Toolbox
+
+### Sistemas Operacionais
+
+- Windows 10/11
+- Linux
+- macOS
+
+---
+
+## 🚀 Como Executar
+
+### 1. Iniciar o Servidor
+
+No MATLAB:
+
+```matlab
 servidor
+```
 
 Saída esperada:
 
+```text
 Servidor iniciado na porta 5000
 Aguardando conexões...
-2. Executar o Cliente
+```
+
+---
+
+### 2. Executar o Cliente
+
+Em outra janela do MATLAB:
+
+```matlab
 cliente
+```
 
 Exemplo:
 
+```text
 Digite uma mensagem:
 Olá servidor
+```
 
 Resposta:
 
+```text
 OLÁ SERVIDOR
-📊 Dashboard
+```
 
-O projeto inclui um dashboard desenvolvido em MATLAB App Designer.
+---
 
-Funcionalidades
-Aba Logs
-Visualização do servidor.log
-Atualização em tempo real
-Aba Métricas
-RTT médio
-Throughput médio
-Quantidade de pacotes
-Aba Gráficos
-Throughput × Tamanho da Mensagem
-RTT × Tamanho da Mensagem
-🧪 Testes Realizados
-Teste de Desempenho
+## 📊 Dashboard de Monitoramento
+
+O projeto inclui uma aplicação gráfica desenvolvida em MATLAB App Designer.
+
+### Funcionalidades
+
+#### 📄 Aba Logs
+
+- Visualização do arquivo `servidor.log`
+- Atualização em tempo real
+
+#### 📈 Aba Métricas
+
+- RTT médio
+- Throughput médio
+- Quantidade de pacotes processados
+
+#### 📉 Aba Gráficos
+
+- Throughput × Tamanho da Mensagem
+- RTT × Tamanho da Mensagem
+
+---
+
+## 🧪 Testes de Desempenho
 
 Foram realizadas:
 
-15 transmissões para cada tamanho
-3 tamanhos de payload
-Cenários com AES
-Cenários sem AES
+- 15 transmissões por cenário;
+- 3 tamanhos de payload;
+- Testes com AES-128;
+- Testes sem AES-128.
 
-Total:
+### Total de medições
 
-90 medições
-Tamanhos Testados
-Tamanho
-256 bytes
-1024 bytes
-4096 bytes
-📈 Resultados com AES
-Tamanho	RTT Médio (s)	Throughput Médio (bytes/s)
-256	0.035586	7.876
-1024	0.037243	28.503
-4096	0.045385	96.528
-📈 Resultados sem AES
-Tamanho	RTT Médio (s)	Throughput Médio (bytes/s)
-256	0.043660	6.028
-1024	0.040923	27.946
-4096	0.048963	85.727
-🛡 Teste de Robustez
+```text
+90 medições experimentais
+```
 
-Foram simulados atrasos artificiais de até:
+### Tamanhos Avaliados
 
-5 segundos
+| Payload |
+|----------|
+| 256 bytes |
+| 1024 bytes |
+| 4096 bytes |
 
-Resultados:
+---
 
-Tamanho	RTT Médio (s)
-256 bytes	0.921
-1024 bytes	0.787
-4096 bytes	0.777
+## 📈 Resultados com AES-128
 
-Resultado observado:
+| Tamanho (bytes) | RTT Médio (s) | Throughput Médio (bytes/s) |
+|----------------|--------------|---------------------------|
+| 256 | 0.035586 | 7.876 |
+| 1024 | 0.037243 | 28.503 |
+| 4096 | 0.045385 | 96.528 |
+
+---
+
+## 📈 Resultados sem AES-128
+
+| Tamanho (bytes) | RTT Médio (s) | Throughput Médio (bytes/s) |
+|----------------|--------------|---------------------------|
+| 256 | 0.043660 | 6.028 |
+| 1024 | 0.040923 | 27.946 |
+| 4096 | 0.048963 | 85.727 |
+
+---
+
+## 🛡 Testes de Robustez
+
+Foram simuladas condições adversas de rede utilizando atrasos artificiais de até **5 segundos**.
+
+### RTT Médio Obtido
+
+| Tamanho da Mensagem | RTT Médio (s) |
+|--------------------|--------------|
+| 256 bytes | 0.921 |
+| 1024 bytes | 0.787 |
+| 4096 bytes | 0.777 |
+
+### Resultados Observados
 
 ✅ Nenhuma perda de mensagem
 
@@ -217,17 +315,52 @@ Resultado observado:
 
 ✅ Nenhuma inconsistência de sessão
 
-📚 Referências
-Kurose, J.; Ross, K. Redes de Computadores e a Internet.
-Stallings, W. Criptografia e Segurança de Redes.
-RFC 2104 – HMAC: Keyed-Hashing for Message Authentication.
-Documentação MATLAB TCP/IP.
-Documentação Java Cryptography Architecture.
-👨‍💻 Autores
+✅ Comunicação mantida durante todo o experimento
 
-Gustavo Henrique Souza Moreira Lemos
+---
 
-João Pedro de Lima Fernandes
+## 📊 Análise de Erros
+
+A estabilidade do protocolo foi avaliada através das normas L1, L2 e L∞ aplicadas aos resultados dos testes de robustez.
+
+| Norma | Valor |
+|---------|---------|
+| L1 (Erro Médio Absoluto) | 0,062 s |
+| L2 (RMSE) | 0,066 s |
+| L∞ (Erro Máximo) | 0,093 s |
+
+Os resultados indicam baixa dispersão dos tempos de resposta mesmo sob condições artificiais de atraso.
+
+---
+
+## 🔐 Overhead de Segurança
+
+O protocolo incorpora:
+
+- Cabeçalho de controle;
+- HMAC-SHA256;
+- Criptografia AES-128;
+- Campos de autenticação e sequência.
+
+Embora o overhead seja significativo para mensagens muito pequenas, ele se torna praticamente desprezível para payloads da ordem de kilobytes, mantendo excelente escalabilidade.
+
+---
+
+## 📚 Referências
+
+- KUROSE, J. F.; ROSS, K. W. *Redes de Computadores e a Internet: uma abordagem top-down*. 7. ed.
+- STALLINGS, W. *Criptografia e Segurança de Redes*. 6. ed.
+- RFC 2104 – HMAC: Keyed-Hashing for Message Authentication.
+- Documentação MATLAB TCP/IP Communication.
+- Documentação Java Cryptography Architecture.
+
+---
+
+## 👨‍💻 Autores
+
+**Gustavo Henrique Souza Moreira Lemos**
+
+**João Pedro de Lima Fernandes**
 
 Universidade do Estado do Rio de Janeiro (UERJ)
 
@@ -235,8 +368,12 @@ Faculdade de Ciências Exatas e Engenharias
 
 Departamento de Computação
 
-Rede de Computadores I – 2026.2
+Disciplina: Rede de Computadores I – 2026.2
 
-📜 Licença
+---
 
-Projeto desenvolvido exclusivamente para fins acadêmicos na disciplina de Rede de Computadores I da UERJ. Uso educacional permitido mediante atribuição aos autores.
+## 📜 Licença
+
+Este projeto foi desenvolvido exclusivamente para fins acadêmicos na disciplina de Rede de Computadores I da UERJ.
+
+O código pode ser utilizado para fins educacionais mediante atribuição aos autores.
